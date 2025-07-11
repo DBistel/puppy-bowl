@@ -1,10 +1,9 @@
 const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api";
 const COHORT = "/2505-FTB-CT-WEB-PT-DanielB"
 const API = API_URL + COHORT;
-const $form = document.querySelector("form");
-const $main = document.querySelector("main");
-const $loading = document.querySelector("#loading-screen")
-const $app = document.querySelector("#app");
+const $form = document.querySelector("form"); //will be used in function later
+const $loading = document.querySelector("#loading-screen")//will be used in function later
+const $app = document.querySelector("#app");//will be used in function later
 let teams = [];
 
 function showLoading () {
@@ -63,9 +62,9 @@ async function fetchAllTeams () {
     }
 }
 
-async function renderAllPlayers () {
+const renderAllPlayers = async() => {
     const playerList = await fetchAllPlayers();
-    // console.log(playerList);
+    console.log(playerList);
     const $players = document.createElement("ul");
     $players.id = "player-list";
     playerList.forEach(player => {
@@ -110,14 +109,14 @@ async function renderAllPlayers () {
 
         $players.appendChild($player);
     });
-
+    const $main = document.querySelector("PlayerList");
     $main.innerHTML = "";
     $main.appendChild($players);
 }
 
 async function renderSinglePlayer (id) {
     const player = await fetchPlayerById(id);
-    
+    const $main = document.querySelector("PlayerList");
     $main.innerHTML = `
     <section id="single-player">
         <h2>${player.name}/${player.team?.name || "Unassigned"} - ${player.status}</h2>
@@ -137,7 +136,6 @@ async function renderSinglePlayer (id) {
             hideLoading();
         }
     });
-    init();
 }
 
 const render = async() =>{
@@ -156,7 +154,9 @@ const render = async() =>{
     </main>
     `;
    await renderAllPlayers();
+
 };
+
 
 // async function init () {
 //     try {
@@ -191,8 +191,9 @@ const render = async() =>{
 
 // init();
 // createPlayer("tobey","dachshund","https://www.vidavetcare.com/wp-content/uploads/sites/234/2022/04/dachshund-dog-breed-info.jpeg");
-fetchAllPlayers();
+
 // fetchPlayerById(38967);
 // removePlayerById(38967);
 // fetchAllTeams();
 render();
+fetchAllPlayers();
