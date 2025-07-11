@@ -173,7 +173,7 @@ async function init () {
 //     }
 // })
 
-init();
+// init();
 // createPlayer("tobey","dachshund","https://www.vidavetcare.com/wp-content/uploads/sites/234/2022/04/dachshund-dog-breed-info.jpeg");
 fetchAllPlayers();
 // fetchPlayerById(38967);
