@@ -1,14 +1,10 @@
-// === Constants ===
-// const BASE = "https://fsa-puppy-bowl.herokuapp.com/api";
-// const COHORT = "/"; // Make sure to change this!
-// const API = BASE + COHORT;
-
 const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api";
 const COHORT = "/2505-FTB-CT-WEB-PT-DanielB"
 const API = API_URL + COHORT;
 const $form = document.querySelector("form");
 const $main = document.querySelector("main");
 const $loading = document.querySelector("#loading-screen")
+const $app = document.querySelector("#app");
 let teams = [];
 
 function showLoading () {
@@ -25,10 +21,11 @@ async function fetchAllPlayers () {
         const result = await response.json();
         players = result.data;
         console.log(result);
-        render();
+        return result.data.players
     } catch (err) {
         console.error(err.message);
     }
+    render();
 }
 
 async function createPlayer (name, breed, imageUrl) {
@@ -140,18 +137,37 @@ async function renderSinglePlayer (id) {
             hideLoading();
         }
     });
+    init();
 }
 
-async function init () {
-    try {
-        await renderAllPlayers();
-        teams = await fetchAllTeams();
-    } catch (err) {
-        console.error(err);
-    } finally {
-        hideLoading();
-    }
-}
+const render = async() =>{
+    const $app = document.querySelector("#app");
+    $app.innerHTML=`
+    <h1>Puppy Bowl</h1>
+    <main>
+    <section>
+        <h2>Players</h2>
+        <PlayerList></PlayerList>
+    </section>
+    <section id="selected">
+        <h2>Player Details</h2>
+        <SelectedPlayer></SelectedPlayer>
+    </section> 
+    </main>
+    `;
+   await renderAllPlayers();
+};
+
+// async function init () {
+//     try {
+//         await renderAllPlayers();
+//         teams = await fetchAllTeams();
+//     } catch (err) {
+//         console.error(err);
+//     } finally {
+//         hideLoading();
+//     }
+// }
 
 // $form.addEventListener("submit", async (e) => {
 //     e.preventDefault();
@@ -179,3 +195,4 @@ fetchAllPlayers();
 // fetchPlayerById(38967);
 // removePlayerById(38967);
 // fetchAllTeams();
+render();
