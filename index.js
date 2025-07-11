@@ -3,7 +3,7 @@
 // const COHORT = "/"; // Make sure to change this!
 // const API = BASE + COHORT;
 
-const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api/2505-FTB-CT-WEB-PThttps://fsa-puppy-bowl.herokuapp.com/api";
+const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api";
 const COHORT = "/2505-FTB-CT-WEB-PT-DanielB"
 const API = API_URL + COHORT;
 const $form = document.querySelector("form");
@@ -21,7 +21,11 @@ function hideLoading () {
 
 async function fetchAllPlayers () {
     try {
-        // see "Get all players"
+        const response = await fetch (`${API}/players`)
+        const result = await response.json();
+        players = result.data;
+        console.log(result);
+        render();
     } catch (err) {
         console.error(err.message);
     }
@@ -149,29 +153,29 @@ async function init () {
     }
 }
 
-$form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const name = document.querySelector("#new-name").value;
-    const breed = document.querySelector("#new-breed").value;
-    const image = document.querySelector("#new-image").value;
+// $form.addEventListener("submit", async (e) => {
+//     e.preventDefault();
+//     const name = document.querySelector("#new-name").value;
+//     const breed = document.querySelector("#new-breed").value;
+//     const image = document.querySelector("#new-image").value;
     
-    showLoading();
-    try {
-        await createPlayer(name, breed, image);
-        renderAllPlayers();
-    } catch (err) {
-        console.error(err.message);
-    } finally {
-        document.querySelector("#new-name").value = "";
-        document.querySelector("#new-breed").value = "";
-        document.querySelector("#new-image").value = "";
-        hideLoading();
-    }
-})
+//     showLoading();
+//     try {
+//         await createPlayer(name, breed, image);
+//         renderAllPlayers();
+//     } catch (err) {
+//         console.error(err.message);
+//     } finally {
+//         document.querySelector("#new-name").value = "";
+//         document.querySelector("#new-breed").value = "";
+//         document.querySelector("#new-image").value = "";
+//         hideLoading();
+//     }
+// })
 
 init();
 // createPlayer("tobey","dachshund","https://www.vidavetcare.com/wp-content/uploads/sites/234/2022/04/dachshund-dog-breed-info.jpeg");
-// fetchAllPlayers();
+fetchAllPlayers();
 // fetchPlayerById(38967);
 // removePlayerById(38967);
 // fetchAllTeams();
