@@ -34,7 +34,7 @@ const playerListItems = (player) => {
     $li.innerHTML=`
     <a href="#selected">
         <h3>${player.name}</h3>
-        <img scr="${player.imageUrl}" alt="Picture of  ${player.name}" style="width: 100px; height: auto;" />
+        <img src="${player.imageUrl}" alt="Picture of  ${player.name}" style="width: 100px; height: auto;" />
     </a>
     `;
     $li.addEventListener("click", async () => {
@@ -51,6 +51,21 @@ const playerList = (players) =>{
 
     const $items = players.map(playerListItems);
     $ul.replaceChildren(...$items);
+
+    return $ul;
+}
+
+const renderSinglePlayer = (player) =>{
+    const $selection = document.querySelector("#selected");
+    $selection.innerHTML=`
+    <h2>${player.name}</h2>
+        <p>${player.breed}</p>
+        <img src="${player.imageUrl}" alt="Picture of ${player.name}" />
+        <section class="player-actions">
+            <button class="details-btn">See Details</button>
+            <button class="remove-btn">Remove Player</button>
+        </section>
+        `;
 }
 
 const render = async () => {
@@ -59,7 +74,7 @@ const render = async () => {
     <main>
     <section>
         <h2>Players</h2>
-        <PlayerList></PlayerList>
+        <div id="player-list"></div>
     </section>
    <section id="selected">
   <h2>Player Details</h2>
@@ -67,15 +82,14 @@ const render = async () => {
 </section>
 
     </main>
-    `
-}
+    `;
+    const players = await fetchAllPlayers();
+    const $list = playerList(players);
+
+    $app.querySelector("#player-list").replaceWith($list);
+};
 
 const init = async () => {
-    const players = await fetchAllPlayers();
-    console.log(players)
-    const testId = 39106
-    const playerId = await fetchPlayerById(testId);
-    console.log(playerId)
-    render();
+    await render();
 }
 init();
