@@ -16,26 +16,37 @@ function hideLoading () {
 
 async function fetchAllPlayers () {
     try {
-        const response = await fetch (`${API}/players`)
+        const response = await fetch (`${API}/players`);
         const result = await response.json();
-        players = result.data;
-        console.log(result);
-        return result.data.players
+        return result.data.players; 
     } catch (err) {
         console.error(err.message);
+        return [];
     }
-    render();
+
 }
 
-async function createPlayer (name, breed, imageUrl) {
+const createPlayer = async(name, breed, imageUrl) => {
     try {
-        // see "Invite a new player"
-        // remember methods and headers
+        const response = await fetch(`${API}/players`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name,
+                breed,
+                imageUrl
+            })
+        });
+
+        const json = await response.json();
         return json.data.newPlayer;
     } catch (err) {
         console.error(err.message);
     }
 }
+
 
 async function fetchPlayerById (id) {
     try {
@@ -61,7 +72,7 @@ async function fetchAllTeams () {
         console.error(err.message);
     }
 }
-
+//==details all players==
 const renderAllPlayers = async() => {
     const playerList = await fetchAllPlayers();
     console.log(playerList);
@@ -114,7 +125,31 @@ const renderAllPlayers = async() => {
     $main.appendChild($players);
 }
 
-async function renderSinglePlayer (id) {
+function PartyListItem(player) {
+  const $li = document.createElement("li");
+
+  if (player.id === selectedParty?.id) {
+    $li.classList.add("selected");
+  }
+
+  $li.innerHTML = `
+    <a href="#selected">${player.name}</a>
+  `;
+  $li.addEventListener("click", () => getParty(player.id));
+  return $li;
+}
+
+function listAllPlayers() {
+  const $ul = document.createElement("ul");
+  $ul.classList.add("players");
+
+  const $players = players.map(PartyListItem);
+  $ul.replaceChildren(...$players);
+
+  return $ul;
+}
+
+const renderSinglePlayer = async(id) => {
     const player = await fetchPlayerById(id);
     const $main = document.querySelector("PlayerList");
     $main.innerHTML = `
@@ -153,6 +188,8 @@ const render = async() =>{
     </section> 
     </main>
     `;
+    $app.querySelector("PlayerList").replaceWith(listAllPlayers())
+    //$app.querySelector("SelectedPlayer").replaceWith(renderSinglePlayer())
    await renderAllPlayers();
 
 };
@@ -197,3 +234,4 @@ const render = async() =>{
 // fetchAllTeams();
 render();
 fetchAllPlayers();
+renderSinglePlayer();
