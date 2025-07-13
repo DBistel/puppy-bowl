@@ -1,14 +1,9 @@
-// === Constants ===
-// const BASE = "https://fsa-puppy-bowl.herokuapp.com/api";
-// const COHORT = "/"; // Make sure to change this!
-// const API = BASE + COHORT;
-
 const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api";
 const COHORT = "/2505-FTB-CT-WEB-PT-DanielB"
 const API = API_URL + COHORT;
-const $form = document.querySelector("form");
-const $main = document.querySelector("main");
-const $loading = document.querySelector("#loading-screen")
+const $form = document.querySelector("form"); //will be used in function later
+const $loading = document.querySelector("#loading-screen")//will be used in function later
+const $app = document.querySelector("#app");//will be used in function later
 let teams = [];
 
 function showLoading () {
@@ -21,25 +16,37 @@ function hideLoading () {
 
 async function fetchAllPlayers () {
     try {
-        const response = await fetch (`${API}/players`)
+        const response = await fetch (`${API}/players`);
         const result = await response.json();
-        players = result.data;
-        console.log(result);
-        render();
+        return result.data.players; 
     } catch (err) {
         console.error(err.message);
+        return [];
     }
+
 }
 
-async function createPlayer (name, breed, imageUrl) {
+const createPlayer = async(name, breed, imageUrl) => {
     try {
-        // see "Invite a new player"
-        // remember methods and headers
+        const response = await fetch(`${API}/players`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name,
+                breed,
+                imageUrl
+            })
+        });
+
+        const json = await response.json();
         return json.data.newPlayer;
     } catch (err) {
         console.error(err.message);
     }
 }
+
 
 async function fetchPlayerById (id) {
     try {
@@ -65,10 +72,10 @@ async function fetchAllTeams () {
         console.error(err.message);
     }
 }
-
-async function renderAllPlayers () {
+//==details all players==
+const renderAllPlayers = async() => {
     const playerList = await fetchAllPlayers();
-    // console.log(playerList);
+    console.log(playerList);
     const $players = document.createElement("ul");
     $players.id = "player-list";
     playerList.forEach(player => {
@@ -113,14 +120,38 @@ async function renderAllPlayers () {
 
         $players.appendChild($player);
     });
-
+    const $main = document.querySelector("PlayerList");
     $main.innerHTML = "";
     $main.appendChild($players);
 }
 
-async function renderSinglePlayer (id) {
+function PartyListItem(player) {
+  const $li = document.createElement("li");
+
+  if (player.id === selectedParty?.id) {
+    $li.classList.add("selected");
+  }
+
+  $li.innerHTML = `
+    <a href="#selected">${player.name}</a>
+  `;
+  $li.addEventListener("click", () => getParty(player.id));
+  return $li;
+}
+
+function listAllPlayers() {
+  const $ul = document.createElement("ul");
+  $ul.classList.add("players");
+
+  const $players = players.map(PartyListItem);
+  $ul.replaceChildren(...$players);
+
+  return $ul;
+}
+
+const renderSinglePlayer = async(id) => {
     const player = await fetchPlayerById(id);
-    
+    const $main = document.querySelector("PlayerList");
     $main.innerHTML = `
     <section id="single-player">
         <h2>${player.name}/${player.team?.name || "Unassigned"} - ${player.status}</h2>
@@ -142,16 +173,38 @@ async function renderSinglePlayer (id) {
     });
 }
 
-async function init () {
-    try {
-        await renderAllPlayers();
-        teams = await fetchAllTeams();
-    } catch (err) {
-        console.error(err);
-    } finally {
-        hideLoading();
-    }
-}
+const render = async() =>{
+    const $app = document.querySelector("#app");
+    $app.innerHTML=`
+    <h1>Puppy Bowl</h1>
+    <main>
+    <section>
+        <h2>Players</h2>
+        <PlayerList></PlayerList>
+    </section>
+    <section id="selected">
+        <h2>Player Details</h2>
+        <SelectedPlayer></SelectedPlayer>
+    </section> 
+    </main>
+    `;
+    $app.querySelector("PlayerList").replaceWith(listAllPlayers())
+    //$app.querySelector("SelectedPlayer").replaceWith(renderSinglePlayer())
+   await renderAllPlayers();
+
+};
+
+
+// async function init () {
+//     try {
+//         await renderAllPlayers();
+//         teams = await fetchAllTeams();
+//     } catch (err) {
+//         console.error(err);
+//     } finally {
+//         hideLoading();
+//     }
+// }
 
 // $form.addEventListener("submit", async (e) => {
 //     e.preventDefault();
@@ -175,7 +228,10 @@ async function init () {
 
 // init();
 // createPlayer("tobey","dachshund","https://www.vidavetcare.com/wp-content/uploads/sites/234/2022/04/dachshund-dog-breed-info.jpeg");
-fetchAllPlayers();
+
 // fetchPlayerById(38967);
 // removePlayerById(38967);
 // fetchAllTeams();
+render();
+fetchAllPlayers();
+renderSinglePlayer();
