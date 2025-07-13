@@ -14,7 +14,7 @@ function hideLoading () {
     $loading.setAttribute("style", "display:none;");
 }
 
-async function fetchAllPlayers () {
+const fetchAllPlayers =  async() => {
     try {
         const response = await fetch (`${API}/players`);
         const result = await response.json();
@@ -48,22 +48,27 @@ const createPlayer = async(name, breed, imageUrl) => {
 }
 
 
-async function fetchPlayerById (id) {
+const fetchPlayerById = async(id) => {
     try {
-        // see "Get a player by ID"
+        const response = await fetch(`${API}/players/${id}`);
+        const json = await response.json();
+        return json.data.player;
     } catch (err) {
         console.error(err.message);
     }
 }
 
-async function removePlayerById (id) {
+
+const removePlayerById = async(id) => {
     try {
-        // see "Remove a player by ID"
-        // remember to set method
+        await fetch(`${API}/players/${id}`, {
+            method: "DELETE"
+        });
     } catch (err) {
         console.error(err.message);
     }
 }
+
 
 async function fetchAllTeams () {
     try {
