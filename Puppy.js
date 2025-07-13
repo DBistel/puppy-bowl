@@ -28,7 +28,24 @@ const fetchPlayerById =  async(id) => {
     }
 }
 
-const playerList = (player) =>{
+const playerListItems = (player) => {
+    const $li = document.createElement("li");
+
+    $li.innerHTML=`
+    <a href="#selected">
+        <h3>${player.name}</h3>
+        <img scr="${player.imageUrl}" alt="Picture of  ${player.name}" style="width: 100px; height: auto;" />
+    </a>
+    `;
+    $li.addEventListener("click", async () => {
+        const fullPlayer = await fetchPlayerById(player.id)
+        renderSinglePlayer(fullPlayer)
+        
+    });
+    return $li;
+}
+
+const playerList = (players) =>{
     const $ul = document.createElement("ul");
     $ul.classList.add("player-list");
 
