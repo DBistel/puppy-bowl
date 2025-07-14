@@ -68,25 +68,102 @@ const renderSinglePlayer = (player) =>{
         `;
 }
 
+
+const addNewPlayer = () => {
+    const $form = document.createElement("form");
+    $form.innerHTML=`
+  <div class="form-group">
+    <label for = "playerName">Player Name</label>
+    <input class="form-control" id="newPlayerName" placeholder="Buddy, Max, Oliver">
+ <div>
+   <div class="form-group">
+    <label for="Breed">Breed</label>
+    <input class="form-control" id="newEventDescription" placeholder="basset hound, golden retriever, Heinz 57">
+  </div>
+   <div class="form-group">
+   <label for="status">Status:</label>
+    <select id="status" name="status">
+        <option value="null">-Select one-</option>
+        <option value="field">Field</option>
+        <option value="bench">Benched</option>
+    </select>
+  </div>
+   <div class="form-group">
+    <label for="imgUrl">Picture</label>
+    <input class="form-control" id="newEventLocation" placeholder="https://image.com">
+  </div>
+  <button type="submit" class="btn btn-primary">Create Event</button>
+    `;
+    $form.addEventListener("click", (e) => {
+    e.preventDefault();
+    })
+    return $form;
+}
+
+const newPlayer = async (e) => {
+  e.preventDefault();
+  
+    const name = e.target[0].value;
+    const breed = e.target[1].value;
+    const status = e.target[2].value;
+    const imageUrl = e.target[3].value;
+
+  const obj = {
+    name,
+    breed,
+    status,
+    imageUrl,
+
+  };
+  console.log("submitting player:", obj);
+
+  try {
+    const response = await fetch((`${API}/players`),{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(obj),
+      }
+    );
+
+    // console.log(response);
+    const data = await response.json();
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+  await init();
+};
+
 const render = async () => {
     $app.innerHTML=`
     <h1>Puppy Bowl</h1>
     <main>
-    <section>
+    <section id="player-selection">
         <h2>Players</h2>
+        <p id="player-message">Please select a player to see more details.</p>
         <div id="player-list"></div>
     </section>
    <section id="selected">
   <h2>Player Details</h2>
-  <p id="player-message">Please select a player to see more details.</p>
+</section>
+<section id="newPlayer">
+    <h2>Add a new player:</h2>
+    <form id="newPlayerForm"></form>
 </section>
 
     </main>
     `;
+
     const players = await fetchAllPlayers();
     const $list = playerList(players);
-
     $app.querySelector("#player-list").replaceWith($list);
+
+    const newPlayer = await addNewPlayer();
+    const $form = addNewPlayer(newPlayer);
+    $app.querySelector("#newPlayerForm").replaceWith($form)
+    $form.addEventListener("submit",newPlayer)
 };
 
 const init = async () => {
