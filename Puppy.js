@@ -1,9 +1,8 @@
 const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api";
 const COHORT = "/2505-FTB-CT-WEB-PT-DanielB"
 const API = API_URL + COHORT;
-const $form = document.querySelector("form"); //will be used in function later
-const $loading = document.querySelector("#loading-screen")//will be used in function later
-const $app = document.querySelector("#app");//will be used in function later
+const $form = document.querySelector("form"); 
+const $app = document.querySelector("#app");
 let teams = [];
 
 const fetchAllPlayers =  async() => {
@@ -60,12 +59,25 @@ const renderSinglePlayer = (player) =>{
     $selection.innerHTML=`
     <h2>${player.name}</h2>
         <p>${player.breed}</p>
+        <p>${player.status}</p>
         <img src="${player.imageUrl}" alt="Picture of ${player.name}" />
         <section class="player-actions">
-            <button class="details-btn">See Details</button>
             <button class="remove-btn">Remove Player</button>
         </section>
         `;
+        $removeBtn.addEventListener("click", async () => {
+            try {
+                const confirmRemove = confirm(`Are you sure you want to remove ${player.name} from the roster?`);
+                if (!confirmRemove) return;
+                showLoading();
+                await removePlayerById(player.id);
+                await renderAllPlayers();
+            } catch (err) {
+                console.error(err.message);
+            } finally {
+                hideLoading();
+            }
+        })
 }
 
 
@@ -92,49 +104,41 @@ const addNewPlayer = () => {
     <label for="imgUrl">Picture</label>
     <input class="form-control" id="newEventLocation" placeholder="https://image.com">
   </div>
-  <button type="submit" class="btn btn-primary">Create Event</button>
+  <button type="submit" class="btn btn-primary">Invite Puppy</button>
     `;
-    $form.addEventListener("click", (e) => {
-    e.preventDefault();
-    })
+    // $form.addEventListener("click", (e) => {
+    // e.preventDefault();
+    // })
     return $form;
 }
 
 const newPlayer = async (e) => {
   e.preventDefault();
-  
-    const name = e.target[0].value;
-    const breed = e.target[1].value;
-    const status = e.target[2].value;
-    const imageUrl = e.target[3].value;
 
-  const obj = {
-    name,
-    breed,
-    status,
-    imageUrl,
-
-  };
-  console.log("submitting player:", obj);
+  const name = e.target[0].value;     
+  const breed = e.target[1].value;    
+  const status = e.target[2].value;   
+  const imageUrl = e.target[3].value; 
+  const obj = { name, breed, status, imageUrl };
 
   try {
-    const response = await fetch((`${API}/players`),{
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(obj),
-      }
-    );
+    const response = await fetch(`${API}/players`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(obj),
+    });
 
-    // console.log(response);
     const data = await response.json();
-    console.log(data);
+    console.log("New player created:", data);
   } catch (error) {
-    console.error(error);
+    console.error("Error creating player:", error);
   }
+
   await init();
 };
+
 
 const render = async () => {
     $app.innerHTML=`
@@ -160,10 +164,9 @@ const render = async () => {
     const $list = playerList(players);
     $app.querySelector("#player-list").replaceWith($list);
 
-    const newPlayer = await addNewPlayer();
     const $form = addNewPlayer(newPlayer);
-    $app.querySelector("#newPlayerForm").replaceWith($form)
-    $form.addEventListener("submit",newPlayer)
+    $form.addEventListener("submit",newPlayer);
+    document.querySelector("#newPlayerForm").replaceWith($form)
 };
 
 const init = async () => {
