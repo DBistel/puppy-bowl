@@ -65,20 +65,30 @@ const renderSinglePlayer = (player) =>{
             <button class="remove-btn">Remove Player</button>
         </section>
         `;
+        const $removeBtn = $selection.querySelector(".remove-btn");
         $removeBtn.addEventListener("click", async () => {
-            try {
-                const confirmRemove = confirm(`Are you sure you want to remove ${player.name} from the roster?`);
-                if (!confirmRemove) return;
-                showLoading();
+            const confirm = confirm("Please confirm. This action cannot be undone.")
+            if (!confirm) return
+            try{
                 await removePlayerById(player.id);
-                await renderAllPlayers();
-            } catch (err) {
-                console.error(err.message);
-            } finally {
-                hideLoading();
+                await init();
+            } catch (error){
+                console.log (error);
             }
+   
         })
 }
+
+const removePlayerById = async (id) => {
+  try {
+    await fetch(`${API}/players/${id}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    console.error("Failed to remove player:", error);
+  }
+};
+
 
 
 const addNewPlayer = () => {
