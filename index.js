@@ -78,60 +78,57 @@ async function fetchAllTeams () {
     }
 }
 //==details all players==
-const renderAllPlayers = async () => {
-  const playerList = await fetchAllPlayers();
-  const $players = document.createElement("ul");
-  $players.id = "player-list-ul";
+const renderAllPlayers = async() => {
+    const playerList = await fetchAllPlayers();
+    console.log(playerList);
+    const $players = document.createElement("ul");
+    $players.id = "player-list";
+    playerList.forEach(player => {
+        const $player = document.createElement("li");
+        $player.className = "player-card";
+        $player.innerHTML += `
+        <h2>${player.name}</h2>
+        <p>${player.breed}</p>
+        <img src="${player.imageUrl}" alt="Picture of ${player.name}" />
+        <section class="player-actions">
+            <button class="details-btn">See Details</button>
+            <button class="remove-btn">Remove Player</button>
+        </section>
+        `;
+        $detailsBtn = $player.querySelector(".details-btn");
+        $removeBtn = $player.querySelector(".remove-btn");
 
-  playerList.forEach((player) => {
-    const $player = document.createElement("li");
-    $player.className = "player-card";
-    $player.innerHTML = `
-      <h2>${player.name}</h2>
-      <p>${player.breed}</p>
-      <img src="${player.imageUrl}" alt="Picture of ${player.name}" />
-      <section class="player-actions">
-        <button class="details-btn">See Details</button>
-        <button class="remove-btn">Remove Player</button>
-      </section>
-    `;
+        $detailsBtn.addEventListener("click", async () => {
+            showLoading();
+            try {
+                await renderSinglePlayer(player.id);
+            } catch (err) {
+                console.error(err.message);
+            } finally {
+                hideLoading();
+            }
+        });
 
-    const $detailsBtn = $player.querySelector(".details-btn");
-    const $removeBtn = $player.querySelector(".remove-btn");
+        $removeBtn.addEventListener("click", async () => {
+            try {
+                const confirmRemove = confirm(`Are you sure you want to remove ${player.name} from the roster?`);
+                if (!confirmRemove) return;
+                showLoading();
+                await removePlayerById(player.id);
+                await renderAllPlayers();
+            } catch (err) {
+                console.error(err.message);
+            } finally {
+                hideLoading();
+            }
+        })
 
-    $detailsBtn.addEventListener("click", async () => {
-      showLoading();
-      try {
-        await renderSinglePlayer(player.id);
-      } catch (err) {
-        console.error(err.message);
-      } finally {
-        hideLoading();
-      }
+        $players.appendChild($player);
     });
-
-    $removeBtn.addEventListener("click", async () => {
-      try {
-        const confirmRemove = confirm(`Are you sure you want to remove ${player.name}?`);
-        if (!confirmRemove) return;
-        showLoading();
-        await removePlayerById(player.id);
-        await renderAllPlayers();
-      } catch (err) {
-        console.error(err.message);
-      } finally {
-        hideLoading();
-      }
-    });
-
-    $players.appendChild($player);
-  });
-
-  const $main = document.querySelector("#player-list");
-  $main.innerHTML = "";
-  $main.appendChild($players);
-};
-
+    const $main = document.querySelector("#player-list");
+    $main.innerHTML = "";
+    $main.appendChild($players);
+}
 
 function PartyListItem(player) {
   const $li = document.createElement("li");
@@ -159,7 +156,7 @@ function listAllPlayers() {
 
 const renderSinglePlayer = async(id) => {
     const player = await fetchPlayerById(id);
-    const $main = document.querySelector("#selected");
+    const $main = document.querySelector("PlayerList");
     $main.innerHTML = `
     <section id="single-player">
         <h2>${player.name}/${player.team?.name || "Unassigned"} - ${player.status}</h2>
@@ -183,86 +180,65 @@ const renderSinglePlayer = async(id) => {
 
 const render = async () => {
   const $app = document.querySelector("#app");
-  $app.innerHTML = ""; // Clear it
-
-  const $title = document.createElement("h1");
-  $title.textContent = "Puppy Bowl";
-
-  const $main = document.createElement("main");
-
-  // --- PLAYER SECTION ---
-  const $playerSection = document.createElement("section");
-  const $playerHeader = document.createElement("h2");
-  $playerHeader.textContent = "Players";
-
-  const $playerList = document.createElement("section");
-  $playerList.id = "player-list";
-
-  $playerSection.appendChild($playerHeader);
-  $playerSection.appendChild($playerList);
-
-  // --- SELECTED PLAYER SECTION ---
-  const $selectedSection = document.createElement("section");
-  $selectedSection.id = "selected";
-  const $selectedHeader = document.createElement("h2");
-  $selectedHeader.textContent = "Player Details";
-  const $selectedMsg = document.createElement("p");
-  $selectedMsg.id = "player-message";
-  $selectedMsg.textContent = "Please select a player to see more details.";
-
-  $selectedSection.appendChild($selectedHeader);
-  $selectedSection.appendChild($selectedMsg);
-
-  // --- FORM SECTION ---
-  const $formSection = document.createElement("section");
-  $formSection.id = "form-section";
-  $formSection.innerHTML = `
-    <h2>Add a New Puppy</h2>
-    <form id="add-player-form">
-      <input id="new-name" placeholder="Name" required />
-      <input id="new-breed" placeholder="Breed" required />
-      <input id="new-image" placeholder="Image URL" />
-      <button type="submit">Add Player</button>
-    </form>
+  $app.innerHTML = `
+    <h1>Puppy Bowl</h1>
+    <main>
+      <section>
+        <h2>Players</h2>
+        <div id="player-list"></div>
+      </section>
+      <section id="selected">
+        <h2>Player Details</h2>
+        <p id="player-message">Please select a player to see more details.</p>
+      </section>
+    </main>
   `;
-
-  // Append everything
-  $main.appendChild($playerSection);
-  $main.appendChild($selectedSection);
-  $main.appendChild($formSection);
-  $app.appendChild($title);
-  $app.appendChild($main);
-
-  // Add event listener to the form AFTER it's rendered
-  const $form = document.querySelector("#add-player-form");
-  $form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const name = document.querySelector("#new-name").value;
-    const breed = document.querySelector("#new-breed").value;
-    const image = document.querySelector("#new-image").value;
-
-    showLoading();
-    try {
-      await createPlayer(name, breed, image);
-      await renderAllPlayers();
-    } catch (err) {
-      console.error(err.message);
-    } finally {
-      document.querySelector("#new-name").value = "";
-      document.querySelector("#new-breed").value = "";
-      document.querySelector("#new-image").value = "";
-      hideLoading();
-    }
-  });
 
   await renderAllPlayers(); 
 };
 
 
 
+// async function init () {
+//     try {
+//         await renderAllPlayers();
+//         teams = await fetchAllTeams();
+//     } catch (err) {
+//         console.error(err);
+//     } finally {
+//         hideLoading();
+//     }
+// }
+
+// $form.addEventListener("submit", async (e) => {
+//     e.preventDefault();
+//     const name = document.querySelector("#new-name").value;
+//     const breed = document.querySelector("#new-breed").value;
+//     const image = document.querySelector("#new-image").value;
+    
+//     showLoading();
+//     try {
+//         await createPlayer(name, breed, image);
+//         renderAllPlayers();
+//     } catch (err) {
+//         console.error(err.message);
+//     } finally {
+//         document.querySelector("#new-name").value = "";
+//         document.querySelector("#new-breed").value = "";
+//         document.querySelector("#new-image").value = "";
+//         hideLoading();
+//     }
+// })
+
+// init();
+// createPlayer("tobey","dachshund","https://www.vidavetcare.com/wp-content/uploads/sites/234/2022/04/dachshund-dog-breed-info.jpeg");
+
+// fetchPlayerById(38967);
+// removePlayerById(38967);
+// fetchAllTeams();
 const init = async () => {
 fetchAllPlayers();
 renderSinglePlayer();
 render();
 }
-init();
+init

@@ -1,7 +1,6 @@
 const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api";
 const COHORT = "/2505-FTB-CT-WEB-PT-DanielB"
 const API = API_URL + COHORT;
-const $form = document.querySelector("form"); 
 const $app = document.querySelector("#app");
 let teams = [];
 
@@ -67,11 +66,16 @@ const renderSinglePlayer = (player) =>{
         `;
         const $removeBtn = $selection.querySelector(".remove-btn");
         $removeBtn.addEventListener("click", async () => {
-            const confirm = confirm("Please confirm. This action cannot be undone.")
-            if (!confirm) return
+            const confirmed = confirm("Please confirm. This action cannot be undone.")
+            if (!confirmed) return
             try{
                 await removePlayerById(player.id);
                 await init();
+                document.querySelector("#selected").innerHTML = `
+                    <h2>Player Details</h2>
+                    <p id="player-message">Please select a player to see more details.</p>
+                    `;
+
             } catch (error){
                 console.log (error);
             }
@@ -97,10 +101,10 @@ const addNewPlayer = () => {
   <div class="form-group">
     <label for = "playerName">Player Name</label>
     <input class="form-control" id="newPlayerName" placeholder="Buddy, Max, Oliver">
- <div>
+ </div>
    <div class="form-group">
     <label for="Breed">Breed</label>
-    <input class="form-control" id="newEventDescription" placeholder="basset hound, golden retriever, Heinz 57">
+    <input class="form-control" id="newPlayerBreed" placeholder="basset hound, golden retriever, Heinz 57">
   </div>
    <div class="form-group">
    <label for="status">Status:</label>
@@ -112,7 +116,7 @@ const addNewPlayer = () => {
   </div>
    <div class="form-group">
     <label for="imgUrl">Picture</label>
-    <input class="form-control" id="newEventLocation" placeholder="https://image.com">
+    <input class="form-control" id="newPlayerImage" placeholder="https://image.com">
   </div>
   <button type="submit" class="btn btn-primary">Invite Puppy</button>
     `;
@@ -129,6 +133,7 @@ const newPlayer = async (e) => {
   const breed = e.target[1].value;    
   const status = e.target[2].value;   
   const imageUrl = e.target[3].value; 
+
   const obj = { name, breed, status, imageUrl };
 
   try {
@@ -174,7 +179,7 @@ const render = async () => {
     const $list = playerList(players);
     $app.querySelector("#player-list").replaceWith($list);
 
-    const $form = addNewPlayer(newPlayer);
+    const $form = addNewPlayer();
     $form.addEventListener("submit",newPlayer);
     document.querySelector("#newPlayerForm").replaceWith($form)
 };
