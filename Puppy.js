@@ -4,13 +4,13 @@ const API = API_URL + COHORT;
 const $app = document.querySelector("#app");
 let teams = [];
 
-const showLoading = () => {
-    $loading.setAttribute("style", "display:flex;");
-}
+// const showLoading = () => {
+//     $loading.setAttribute("style", "display:flex;");
+// }
 
-const hideLoading = () => {
-    $loading.setAttribute("style", "display:none;");
-}
+// const hideLoading = () => {
+//     $loading.setAttribute("style", "display:none;");
+// }
 
 const fetchAllPlayers =  async() => {
     try {
