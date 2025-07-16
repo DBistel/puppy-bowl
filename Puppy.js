@@ -4,6 +4,14 @@ const API = API_URL + COHORT;
 const $app = document.querySelector("#app");
 let teams = [];
 
+const showLoading = () => {
+    $loading.setAttribute("style", "display:flex;");
+}
+
+const hideLoading = () => {
+    $loading.setAttribute("style", "display:none;");
+}
+
 const fetchAllPlayers =  async() => {
     try {
         const response = await fetch (`${API}/players`);
@@ -32,7 +40,8 @@ const playerListItems = (player) => {
     $li.innerHTML=`
     <a href="#selected">
         <h3>${player.name}</h3>
-        <img src="${player.imageUrl}" alt="Picture of  ${player.name}" style="width: 100px; height: auto;" />
+        <img src="${player.imageUrl}" alt="Picture of  ${player.name}" 
+        style="width: 100px; height: auto; border-radius: 10px;" />
     </a>
     `;
     $li.addEventListener("click", async () => {
@@ -57,9 +66,10 @@ const renderSinglePlayer = (player) =>{
     const $selection = document.querySelector("#selected");
     $selection.innerHTML=`
     <h2>${player.name}</h2>
-        <p>${player.breed}</p>
-        <p>${player.status}</p>
-        <img src="${player.imageUrl}" alt="Picture of ${player.name}" />
+        <p>Player ID:${player.id}</p>
+        <p>Breed: ${player.breed}</p>
+        <p>Status: ${player.status}</p>
+        <img class="player-detail-img" src="${player.imageUrl}" alt="Picture of ${player.name}" />
         <section class="player-actions">
             <button class="remove-btn">Remove Player</button>
         </section>
@@ -108,7 +118,7 @@ const addNewPlayer = () => {
   </div>
    <div class="form-group">
    <label for="status">Status:</label>
-    <select id="status" name="status">
+    <select id="status" class="form-control" name="status">
         <option value="null">-Select one-</option>
         <option value="field">Field</option>
         <option value="bench">Benched</option>
@@ -156,6 +166,7 @@ const newPlayer = async (e) => {
 
 
 const render = async () => {
+  //showLoading();
     $app.innerHTML=`
     <h1>Puppy Bowl</h1>
     <main>
@@ -182,6 +193,8 @@ const render = async () => {
     const $form = addNewPlayer();
     $form.addEventListener("submit",newPlayer);
     document.querySelector("#newPlayerForm").replaceWith($form)
+
+    //hideLoading();
 };
 
 const init = async () => {
